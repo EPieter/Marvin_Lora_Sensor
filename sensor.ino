@@ -23,9 +23,9 @@ DHT dht(DHTPIN, DHTTYPE);
 /**
    Configuration
 */
-const String DevEUI = "0059AC00001B03EE"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
-const String AppEUI = "0059AC000001099D"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
-const String AppKey = "2d504ccbf019422e8a8a76decc366e50"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
+const String DevEUI = "XXXXXXXXXXXXXXXXX"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
+const String AppEUI = "XXXXXXXXXXXXXXXXX"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
+const String AppKey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
 bool ForceReconfigureMicrochip = false; 
 
 void print(String message) { // Deze functie kun je gebruiken om iets te printen op de seriële monitor. 
