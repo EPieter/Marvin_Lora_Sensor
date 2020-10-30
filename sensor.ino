@@ -1,10 +1,8 @@
-
-
-#include <DHT.h> // Voor de sensor
-#include <thingsml.h> // Voor de LoRa module
+#include <DHT.h> // Library for sensor
+#include <thingsml.h> // Library LoRa module
 
 #define DHTTYPE DHT11
-#define DHTPIN 4     // De pin waaraan de sensor zit. Op de achterkant van het bordje staat welke connector aan welke pin zit. In dit geval gebruiken we de middelste.
+#define DHTPIN 4     // Declares sensor pins, this may vary
 DHT dht(DHTPIN, DHTTYPE);
 #if defined(ARDUINO_ARCH_AVR)
 #define debug  Serial
@@ -15,20 +13,20 @@ DHT dht(DHTPIN, DHTTYPE);
 #endif
 #define DEBUG
 #define SERIAL_BAUD_RATE 9600
-#define LED_PIN 13 // Macro voor LED_PIN. Het ledje is aangeduid met L op het bordje. Voor meer info over macro's zie: https://tinyurl.com/y4qnysrr
-#define APPLICATION_PORT 1 // Als je hiervan afblijft komt het goed
-#define MICROCHIP_BAUD_RATE 57600 // Macro voor de baudrate van de RN2483 (LoRa module). 
-#define MICROCHIP_POWER_PORT 6 // Macro die verwijst naar de pin die de RN2483 stroom geeft.
-#define MICROCHIP_RESET_PORT 5 // Macro die verwijst naar de pin die de RN2483 kan resetten.
+#define LED_PIN 13
+#define APPLICATION_PORT 1 
+#define MICROCHIP_BAUD_RATE 57600 
+#define MICROCHIP_POWER_PORT 6
+#define MICROCHIP_RESET_PORT 5 
 /**
    Configuration
 */
-const String DevEUI = "XXXXXXXXXXXXXXXXX"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
-const String AppEUI = "XXXXXXXXXXXXXXXXX"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
-const String AppKey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Dit variabel moet gewijzigt worden in het variabel die je bij het instellen van het device in het KPN portal kunt vinden.
+const String DevEUI = "XXXXXXXXXXXXXXXXX"; //Change this variable to the code you've can found in your KPN Things Portal
+const String AppEUI = "XXXXXXXXXXXXXXXXX"; //Change this variable to the code you've can found in your KPN Things Portal
+const String AppKey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; //Change this variable to the code you've can found in your KPN Things Portal
 bool ForceReconfigureMicrochip = false; 
 
-void print(String message) { // Deze functie kun je gebruiken om iets te printen op de seriële monitor. 
+void print(String message) { 
   Serial.println(message);
 }
 
@@ -38,7 +36,7 @@ void disableMicrochip() {
   print("Powered Off");
 }
 
-void initMicrochip() {   // Deze functie wordt gebruikt om de RN2483 op te starten. 
+void initMicrochip() {   // This starts the RN2483 module
   String currentDevEui;
   int channelId;
 
@@ -229,7 +227,7 @@ void setup() {
   debug.begin(115200);
   debug.println("DHTxx test!");
   Wire.begin();
-  initMicrochip(); // Start de RN2483 op
+  initMicrochip(); // Starts RN2483 
   dht.begin();
 
 }
@@ -240,39 +238,32 @@ void loop() {
 
   float temp_hum_val[2] = {0};
 
-  if (!dht.readTempAndHumidity(temp_hum_val)) { // Dit leest de sensor uit en bewaard het resultaat in een float (array).
-    debug.print("Luchtvochtigheid: ");
+  if (!dht.readTempAndHumidity(temp_hum_val)) { // Stores sensor readings
+    debug.print("Humidity: ");
     debug.print(temp_hum_val[0]);
     debug.print(" %\t");
-    debug.print("Temperatuur: ");
+    debug.print("Temperature: ");
     debug.print(temp_hum_val[1]);
     debug.println(" *C");
 
   } else {
-    debug.println("Sensor kon niet worden uitgelezen");
+    debug.println("Sensor error");
   }
   delay(1500);
   device.toCbor(buf, 100, SENML_HEX);
 
   /*
-   * De sensorwaarden worden vertuurt met sendPayload. Om data echter te verzenden moeten de waardes hexadecimaal zijn. 
-   * Als dit niet het geval is wordt het niet verzonden en krijg je een error. 
-   * De code hieronder zet de floats van de temperatuur en de luchtvochtigheid om in een hexadecimaal.
-   * Ook combineerd deze code de twee waardes waardoor alles met 1 payload kan worden verzonden waardoor je maar 1 payload hoeft te verwerken.
-   * Hierdoor is de eerste helft van de payload de luchtvochtigheid en de tweede helft de temperatuur.
+   * To be able to send data it has to be in a hexadecimal format. Therefore it has to be converted from a float. The two readings will be combined.
   */
 
-  char hum_temp_String[17]; // Maakt een char array om de hexadecimale waardes op te kunnen staan het ze te verzenden.
+  char hum_temp_String[17]; 
   unsigned i;
   unsigned char *chpt1;
   chpt1 = (unsigned char *)&temp_hum_val[0];
-  sprintf(hum_temp_String, "%02X%02X%02x%02x", chpt1[3], chpt1[2], chpt1[1], chpt1[0]); // Gaat de float langs en maakt het HEX en bewaart dat vanaf memory pos 0
+  sprintf(hum_temp_String, "%02X%02X%02x%02x", chpt1[3], chpt1[2], chpt1[1], chpt1[0]); 
   unsigned char *chpt2;
   chpt2 = (unsigned char *)&temp_hum_val[1];
-  sprintf(hum_temp_String+8,"%02X%02X%02x%02x", chpt2[3], chpt2[2], chpt2[1], chpt2[0]); // Gaat de float langs en maakt het HEX en bewaart dat vanaf memory pos 8 waardoor die de vorige waarde niet overschrijft
-  sendPayload(true, 1, hum_temp_String); // (Moet er wat verzonden worden?, Application Port, Payload)
-  delay(1000);
-  disableMicrochip(); // zet RN2483 uit
+  sprintf(hum_temp_String+8,"%02X%02X%02x%02x", chpt2[3], chpt2[2], chpt2[1], chpt2[0]); 
+  sendPayload(true, 1, hum_temp_String); // Sends the hexadecimal, in this case the first half of the payload will be the humidity and the second half the temperature
   delay(60000); 
-
 }
