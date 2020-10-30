@@ -253,7 +253,9 @@ void loop() {
   device.toCbor(buf, 100, SENML_HEX);
 
   /*
-   * To be able to send data it has to be in a hexadecimal format. Therefore it has to be converted from a float. The two readings will be combined.
+   * To be able to send data it has to be in a hexadecimal format. If the payload is anything else it will result in an error.
+   * The code below converts two floats into one hexadecimal. This way you can send both values in one payload. 
+   * The first half of the hexadecimal will be temp_hum_val[0] and the second half temp_hum_val[1].
   */
 
   char hum_temp_String[17]; 
@@ -264,6 +266,6 @@ void loop() {
   unsigned char *chpt2;
   chpt2 = (unsigned char *)&temp_hum_val[1];
   sprintf(hum_temp_String+8,"%02X%02X%02x%02x", chpt2[3], chpt2[2], chpt2[1], chpt2[0]); 
-  sendPayload(true, 1, hum_temp_String); // Sends the hexadecimal, in this case the first half of the payload will be the humidity and the second half the temperature
-  delay(60000); 
+  sendPayload(true, 1, hum_temp_String); 
+  delay(60000); // On reading a minute
 }
