@@ -259,7 +259,6 @@ void loop() {
   */
 
   char hum_temp_String[17]; 
-  unsigned i;
   unsigned char *chpt1;
   chpt1 = (unsigned char *)&temp_hum_val[0];
   sprintf(hum_temp_String, "%02X%02X%02x%02x", chpt1[3], chpt1[2], chpt1[1], chpt1[0]); 
